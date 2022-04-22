@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -29,7 +30,7 @@ import (
 var base []byte
 
 func main() {
-	grok := flag.String("grok", "", "path to a yaml grok processor (required)")
+	grok := flag.String("grok", "", "path to a yaml grok processor — may include line range 'file.yml:first[-last]' (required)")
 	path := flag.String("path", "", "path to the grok input (required)")
 	std := flag.String("base", "", "base pattern collection (optional)")
 	verbose := flag.Bool("v", false, "run grok with debug=true")
@@ -67,10 +68,41 @@ func main() {
 }
 
 func grokConfig(path string) (config, error) {
+	path, lineRange, useRange := strings.Cut(path, ":")
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return config{}, err
 	}
+	if useRange {
+		lines := bytes.Split(b, []byte{'\n'})
+		f, l, isRange := strings.Cut(lineRange, "-")
+		first, err := strconv.Atoi(f)
+		if err != nil {
+			return config{}, err
+		}
+		if first < 1 || len(lines) < first {
+			return config{}, fmt.Errorf("first line out of range (1,%d): %d", len(lines), first)
+		}
+		lines = lines[first-1:]
+		if isRange {
+			last, err := strconv.Atoi(l)
+			if err != nil {
+				return config{}, err
+			}
+			if last < first || len(lines) < last {
+				return config{}, fmt.Errorf("last line out of range (%d,%d): %d", first, len(lines)+(first-1), last)
+			}
+			last -= (first - 1)
+			lines = lines[:last]
+		}
+		for i, l := range lines {
+			if bytes.HasPrefix(l, []byte("  ")) || bytes.HasPrefix(l, []byte("- ")) {
+				lines[i] = l[2:]
+			}
+		}
+		b = bytes.Join(lines, []byte{'\n'})
+	}
+
 	var cfg struct {
 		Grok config `yaml:"grok"`
 	}

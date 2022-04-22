@@ -44,6 +44,8 @@ exit status 1
 ```
 which will give an non-zero exit status for any mismatch and will highlight lines that do not match.
 
+To avoid having to cut text from a pipeline, it is possible to specify a line range in a pipeline description like so, `groktest -grok file.yaml:first[-last]`. The specified line range must have a single grok processor.
+
 ## Note
 
 Semantics are partially retained, but are mangled to prevent truncation by `grok`, for example above `IPV6:net.ip:ip` becomes `IPV6:net_ip_ip`. This may change in future. The output format is subject to change and should not be relied upon.
