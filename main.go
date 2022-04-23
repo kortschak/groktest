@@ -125,8 +125,14 @@ type visitor struct {
 
 func (v *visitor) Visit(n ast.Node) ast.Visitor {
 	tok := n.GetToken()
-	if v.line != 0 && tok.Position.Line != v.line {
-		return v
+	if v.line != 0 {
+		switch {
+		case tok.Position.Line < v.line:
+			return v
+		case tok.Position.Line > v.line:
+			// Stop if we are past the specified line.
+			return nil
+		}
 	}
 	m, ok := n.(*ast.MappingValueNode)
 	if !ok {
