@@ -44,7 +44,7 @@ exit status 1
 ```
 which will give an non-zero exit status for any mismatch and will highlight lines that do not match.
 
-To avoid having to cut text from a pipeline, it is possible to specify a line range in a pipeline description like so, `groktest -grok file.yaml:first[-last]`. The specified line range must have a single grok processor.
+To avoid having to cut text from a pipeline, it is possible to specify a line in a pipeline description like so, `groktest -grok file.yaml:<line>`. The specified line must be the first line of the grok processor.
 
 ## Note
 
