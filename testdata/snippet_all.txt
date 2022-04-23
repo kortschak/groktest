@@ -1,4 +1,4 @@
-! groktest -grok ip.yaml -path addr.text -all
+! groktest -grok ip.yaml -in addr.text -all
 stderr 'grok: failed to match all inputs'
 cmp stdout expected_output
 

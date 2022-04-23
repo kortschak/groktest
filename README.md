@@ -26,13 +26,13 @@ and a file to examine
 ```
 Then either run as one shot which will get all the matches.
 ```
-$ groktest -grok ip4.yaml -path addr.text
+$ groktest -grok ip4.yaml -in addr.text
 { "@LINE": "    inet 127.0.0.1\/8 scope host lo", "@MATCH": "127.0.0.1\/8", "IPV4:net_ip_ip": "127.0.0.1", "MASK:net_cidr_int": "8" }
 { "@LINE": "    inet6 ::1\/128 scope host ", "@MATCH": "::1\/128", "IPV6:net_ip_ip": "::1", "MASK:net_cidr_int": "128" }
 ```
 or run the program requiring that all lines match
 ```
-$ groktest -grok ip4.yaml -path addr.text -all
+$ groktest -grok ip4.yaml -in addr.text -all
 no match: 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
 no match:     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
 { "@LINE": "    inet 127.0.0.1\/8 scope host lo", "@MATCH": "127.0.0.1\/8", "IPV4:net_ip_ip": "127.0.0.1", "MASK:net_cidr_int": "8" }
