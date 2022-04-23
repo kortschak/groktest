@@ -34,13 +34,13 @@ var base []byte
 
 func groktest() int {
 	grok := flag.String("grok", "", "path to a yaml grok processor (required) — may include line 'file.yml:<line>'")
-	path := flag.String("path", "", "path to the grok input (required)")
+	in := flag.String("in", "", "path to the grok input (required)")
 	std := flag.String("base", "", "base pattern collection (optional)")
 	verbose := flag.Bool("v", false, "run grok with debug=true")
 	full := flag.Bool("full", false, "output complete JSON matching data")
 	all := flag.Bool("all", false, "require that all lines match")
 	flag.Parse()
-	if *grok == "" || *path == "" {
+	if *grok == "" || *in == "" {
 		flag.Usage()
 		return 2
 	}
@@ -61,7 +61,7 @@ func groktest() int {
 	cfg.Debug = *verbose
 	cfg.Full = *full
 	cfg.All = *all
-	cfg.Input, err = filepath.Abs(*path)
+	cfg.Input, err = filepath.Abs(*in)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 1

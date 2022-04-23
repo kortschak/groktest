@@ -1,4 +1,4 @@
-groktest -grok ip.yaml -path addr.text
+groktest -grok ip.yaml -in addr.text
 ! stderr .
 cmp stdout expected_output
 
