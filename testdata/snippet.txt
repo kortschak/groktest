@@ -1,0 +1,21 @@
+groktest -grok ip.yaml -path addr.text
+! stderr .
+cmp stdout expected_output
+
+-- addr.text --
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+-- ip.yaml --
+grok:
+  patterns:
+  - "%{IPV4:net.ip:ip}/%{MASK:net.cidr:int}"
+  - "%{IPV6:net.ip:ip}/%{MASK:net.cidr:int}"
+  pattern_definitions:
+    MASK: "[0-9]+"
+-- expected_output --
+{ "@LINE": "    inet 127.0.0.1\/8 scope host lo", "@MATCH": "127.0.0.1\/8", "IPV4:net_ip_ip": "127.0.0.1", "MASK:net_cidr_int": "8" }
+{ "@LINE": "    inet6 ::1\/128 scope host ", "@MATCH": "::1\/128", "IPV6:net_ip_ip": "::1", "MASK:net_cidr_int": "128" }

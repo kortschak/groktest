@@ -13,7 +13,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -28,10 +27,12 @@ import (
 	"golang.org/x/sys/execabs"
 )
 
+func main() { os.Exit(groktest()) }
+
 //go:embed base.patterns
 var base []byte
 
-func main() {
+func groktest() int {
 	grok := flag.String("grok", "", "path to a yaml grok processor (required) — may include line 'file.yml:<line>'")
 	path := flag.String("path", "", "path to the grok input (required)")
 	std := flag.String("base", "", "base pattern collection (optional)")
@@ -41,32 +42,38 @@ func main() {
 	flag.Parse()
 	if *grok == "" || *path == "" {
 		flag.Usage()
-		os.Exit(2)
+		return 2
 	}
 	if *std != "" {
 		var err error
 		base, err = os.ReadFile(*std)
 		if err != nil {
-			log.Fatalf("failed to read base patterns: %v", err)
+			fmt.Fprintf(os.Stderr, "failed to read base patterns: %v\n", err)
+			return 1
 		}
 	}
 
 	cfg, err := grokConfig(*grok)
 	if err != nil {
-		log.Fatalf("failed to get grok config: %v", err)
+		fmt.Fprintf(os.Stderr, "failed to get grok config: %v\n", err)
+		return 1
 	}
 	cfg.Debug = *verbose
 	cfg.Full = *full
 	cfg.All = *all
 	cfg.Input, err = filepath.Abs(*path)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintln(os.Stderr, err)
+		return 1
 	}
 
 	err = runGrok(cfg)
 	if err != nil {
-		log.Fatalf("grok failed: %v", err)
+		fmt.Fprintf(os.Stderr, "grok: %v\n", err)
+		return 1
 	}
+
+	return 0
 }
 
 func grokConfig(path string) (config, error) {
