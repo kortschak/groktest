@@ -2,7 +2,7 @@
 
 The `groktest` command provide a command line interface for quickly testing Elasticsearch ingest pipeline grok processors.
 
-`groktest` requires that the `grok` tool be in your `$PATH`.
+`groktest` requires that the `grok` tool be in your `$PATH`. `grok` can be installed using your preferred package manager, for example `apt install grok` or `brew install grok`.
 
 ## Example
 
