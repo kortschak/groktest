@@ -1,6 +1,6 @@
 # `groktest`
 
-The `groktest` command provide a command line interface for quickly testing Elasticsearch ingest pipeline grok processors.
+The `groktest` command provides a command line interface for quickly testing Elasticsearch ingest pipeline grok processors.
 
 `groktest` requires that the `grok` tool be in your `$PATH`. `grok` can be installed using your preferred package manager, for example `apt install grok` or `brew install grok`.
 
@@ -42,7 +42,7 @@ no match:        valid_lft forever preferred_lft forever
 2022/04/22 18:14:03 grok failed: failed to match all inputs
 exit status 1
 ```
-which will give an non-zero exit status for any mismatch and will highlight lines that do not match.
+which will give a non-zero exit status for any mismatch and will highlight lines that do not match.
 
 To avoid having to cut text from a pipeline, it is possible to specify a line in a pipeline description like so, `groktest -grok file.yaml:<line>`. The specified line must be the first line of the grok processor.
 
