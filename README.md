@@ -49,3 +49,5 @@ To avoid having to cut text from a pipeline, it is possible to specify a line in
 ## Note
 
 Semantics are partially retained, but are mangled to prevent truncation by `grok`, for example above `IPV6:net.ip:ip` becomes `IPV6:net_ip_ip`. This may change in future. The output format is subject to change and should not be relied upon.
+
+The underlying `grok` implementation does not support multi-line matching, so while `groktest` won't choke on grok processors that contain multi-line patterns, the results will not include matches over lines.
