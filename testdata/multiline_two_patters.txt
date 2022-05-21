@@ -1,6 +1,6 @@
 # This test ensures that the config parser doesn't choke on escaped
 # characters in the pattern definitions, but the underlying grok does
-# not do multiline matching, so we don't expect a sane result.
+# not do multi-line matching, so we don't expect a sane result.
 
 groktest -grok ip.yaml -in addr.text
 ! stderr .
