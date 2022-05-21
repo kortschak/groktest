@@ -146,14 +146,48 @@ func (v *visitor) Visit(n ast.Node) ast.Visitor {
 }
 
 type config struct {
-	Patterns    []string          `yaml:"patterns"`
-	Definitions map[string]string `yaml:"pattern_definitions"`
+	Patterns    []string `yaml:"patterns"`
+	Definitions raw      `yaml:"pattern_definitions"`
 
 	Input string
 	Debug bool
 	Full  bool
 
 	All bool
+}
+
+// raw implements unmarshaling YAML pattern definitions without interpreting
+// escape sequences.
+type raw map[string]string
+
+func (r *raw) UnmarshalYAML(b []byte) error {
+	file, err := parser.ParseBytes(b, 0)
+	if err != nil {
+		return nil
+	}
+	if len(file.Docs) != 1 {
+		return fmt.Errorf("unexpected number of docs in pattern definitions: %d", len(file.Docs))
+	}
+
+	switch m := file.Docs[0].Body.(type) {
+	case *ast.MappingValueNode:
+		*r = raw{m.Key.String(): unquote(m.Value.String())}
+	case *ast.MappingNode:
+		if len(m.Values) == 0 {
+			return nil
+		}
+		*r = make(raw, len(m.Values))
+		for _, v := range m.Values {
+			(*r)[v.Key.String()] = unquote(v.Value.String())
+		}
+	default:
+		return fmt.Errorf("unexpected type for pattern definitions: %s: %s", file.Docs[0].Body.Type(), file)
+	}
+	return nil
+}
+
+func unquote(s string) string {
+	return strings.TrimPrefix(strings.TrimSuffix(s, `"`), `"`)
 }
 
 var (
@@ -266,6 +300,6 @@ var prg = template.Must(template.New("grok").Parse(`program {
     {{range .Patterns}}pattern: "{{.}}"
     {{end -}}
     reaction: "no match"
-  }{{- end -}}
+  }{{- end}}
 }
 `))

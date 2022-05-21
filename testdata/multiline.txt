@@ -1,0 +1,28 @@
+# This test ensures that the config parser doesn't choke on escaped
+# characters in the pattern definitions, but the underlying grok does
+# not do multi-line matching, so we don't expect a sane result.
+
+groktest -grok ip.yaml -in addr.text
+! stderr .
+cmp stdout expected_output
+
+-- addr.text --
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+-- ip.yaml --
+grok:
+  patterns:
+  - "%{GREEDYMULTILINE:addr:text}"
+  pattern_definitions:
+    GREEDYMULTILINE: "(.|\n)*"
+-- expected_output --
+{ "@LINE": "1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000", "@MATCH": "1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000", "GREEDYMULTILINE:addr:text": "1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000" }
+{ "@LINE": "    link\/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00", "@MATCH": "    link\/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00", "GREEDYMULTILINE:addr:text": "    link\/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00" }
+{ "@LINE": "    inet 127.0.0.1\/8 scope host lo", "@MATCH": "    inet 127.0.0.1\/8 scope host lo", "GREEDYMULTILINE:addr:text": "    inet 127.0.0.1\/8 scope host lo" }
+{ "@LINE": "       valid_lft forever preferred_lft forever", "@MATCH": "       valid_lft forever preferred_lft forever", "GREEDYMULTILINE:addr:text": "       valid_lft forever preferred_lft forever" }
+{ "@LINE": "    inet6 ::1\/128 scope host ", "@MATCH": "    inet6 ::1\/128 scope host ", "GREEDYMULTILINE:addr:text": "    inet6 ::1\/128 scope host " }
+{ "@LINE": "       valid_lft forever preferred_lft forever", "@MATCH": "       valid_lft forever preferred_lft forever", "GREEDYMULTILINE:addr:text": "       valid_lft forever preferred_lft forever" }
